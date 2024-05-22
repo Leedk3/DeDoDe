@@ -48,3 +48,10 @@ class DeDoDeDescriptor(nn.Module):
     def describe_keypoints_from_path(self, im_path, keypoints, H = 784, W = 784):
         batch = {"image": self.read_image(im_path, H = H, W = W)}
         return self.describe_keypoints(batch, keypoints)
+
+    def describe_keypoints_from_ros(self, im_in, keypoints, H = 784, W = 784, device=get_best_device()):
+        pil_im = im_in.resize((W, H))
+        standard_im = np.array(pil_im)/255.
+        result_im =  self.normalizer(torch.from_numpy(standard_im).permute(2,0,1)).float().to(device)[None]
+        batch = {"image": result_im}
+        return self.describe_keypoints(batch, keypoints)

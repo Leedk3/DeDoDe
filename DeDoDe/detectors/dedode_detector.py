@@ -69,6 +69,16 @@ class DeDoDeDetector(nn.Module):
         else:
             return self.detect(batch, num_keypoints = num_keypoints)
 
+    def detect_from_ros(self, im_in, num_keypoints = 30_000, H = 784, W = 784, dense = False, device=get_best_device()):
+        pil_im = im_in.resize((W, H))
+        standard_im = np.array(pil_im)/255.
+        result_im =  self.normalizer(torch.from_numpy(standard_im).permute(2,0,1)).float().to(device)[None]
+        batch = {"image": result_im}
+        if dense:
+            return self.detect_dense(batch)
+        else:
+            return self.detect(batch, num_keypoints = num_keypoints)
+
     def to_pixel_coords(self, x, H, W):
         return to_pixel_coords(x, H, W)
     
